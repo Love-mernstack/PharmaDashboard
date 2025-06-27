@@ -14,7 +14,7 @@ const Sidebar = () => {
   const location = useLocation();
 
   return (
-    <aside className="h-screen w-64 bg-white border-r p-6 shadow-md rounded-tr-3xl rounded-br-3xl">
+    <aside className="fixed top-0 left-0 h-screen w-64 bg-white border-r shadow-lg z-50 p-6">
       <h2 className="text-3xl font-bold mb-10 text-teal-600 tracking-tight">
         PharmaDash
       </h2>

@@ -12,6 +12,8 @@ import {
   Pie,
   Cell,
   Legend,
+  LineChart,
+  Line,
 } from "recharts";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
@@ -26,11 +28,26 @@ const salesData = [
   { name: "Jun", sales: 2390 },
 ];
 
+const revenueData = [
+  { name: "Jan", revenue: 22000 },
+  { name: "Feb", revenue: 24000 },
+  { name: "Mar", revenue: 20000 },
+  { name: "Apr", revenue: 27800 },
+  { name: "May", revenue: 30000 },
+  { name: "Jun", revenue: 32000 },
+];
+
 const categoryData = [
   { name: "Tablets", value: 400 },
   { name: "Syrups", value: 300 },
   { name: "Injections", value: 300 },
   { name: "Ointments", value: 200 },
+];
+
+const stockStatusData = [
+  { name: "In Stock", value: 950 },
+  { name: "Low Stock", value: 150 },
+  { name: "Expired", value: 70 },
 ];
 
 const statCards = [
@@ -66,12 +83,43 @@ const statCards = [
     color: "bg-purple-100",
     text: "text-purple-800",
   },
+  {
+    title: "Expired Medicines",
+    value: "70",
+    growth: "+10%",
+    positive: false,
+    color: "bg-red-100",
+    text: "text-red-800",
+  },
+  {
+    title: "Low Stock Alerts",
+    value: "150",
+    growth: "+6%",
+    positive: false,
+    color: "bg-yellow-100",
+    text: "text-yellow-800",
+  },
+  {
+    title: "Pending Orders",
+    value: "34",
+    growth: "-2%",
+    positive: false,
+    color: "bg-orange-100",
+    text: "text-orange-800",
+  },
+  {
+    title: "This Month's Revenue",
+    value: "₹32,000",
+    growth: "+15%",
+    positive: true,
+    color: "bg-indigo-100",
+    text: "text-indigo-800",
+  },
 ];
 
 const Dashboard = () => {
   return (
     <div className="p-6">
-      {/* Header */}
       <h2 className="text-3xl font-bold mb-1 text-gray-800">Welcome Back!</h2>
       <p className="text-gray-500 mb-6">
         Here’s a detailed view of your pharmacy performance and analytics.
@@ -92,7 +140,11 @@ const Dashboard = () => {
                   card.positive ? "text-green-600" : "text-red-600"
                 }`}
               >
-                {card.positive ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                {card.positive ? (
+                  <ArrowUpRight size={16} />
+                ) : (
+                  <ArrowDownRight size={16} />
+                )}
                 {card.growth}
               </span>
             </div>
@@ -101,8 +153,8 @@ const Dashboard = () => {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Sales Bar Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+        {/* Bar Chart */}
         <div className="bg-white p-6 rounded-xl shadow-md">
           <h3 className="text-xl font-semibold mb-4 text-gray-800">
             Monthly Sales Overview
@@ -120,6 +172,26 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Line Chart */}
+        <div className="bg-white p-6 rounded-xl shadow-md">
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">
+            Revenue Trends (Last 6 Months)
+          </h3>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={revenueData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="revenue" stroke="#8B5CF6" strokeWidth={3} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Category Pie Chart */}
         <div className="bg-white p-6 rounded-xl shadow-md">
           <h3 className="text-xl font-semibold mb-4 text-gray-800">
@@ -138,6 +210,34 @@ const Dashboard = () => {
                   label={({ name }) => name}
                 >
                   {categoryData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Legend verticalAlign="bottom" height={36} />
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Stock Status Chart */}
+        <div className="bg-white p-6 rounded-xl shadow-md">
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">
+            Medicine Stock Status
+          </h3>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={stockStatusData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={90}
+                  dataKey="value"
+                  label={({ name }) => name}
+                >
+                  {stockStatusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

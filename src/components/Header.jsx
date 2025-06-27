@@ -20,7 +20,7 @@ const Header = () => {
   });
 
   return (
-    <header className="h-20 px-6 flex items-center justify-between bg-white border-b shadow-sm">
+    <header className="fixed top-0 left-64 right-0 z-40 h-20 px-6 flex items-center justify-between bg-white border-b shadow-sm">
       {/* Left Side: Brand and Page Title */}
       <div className="flex flex-col">
         <h1 className="text-2xl font-bold text-teal-700">PharmaDash</h1>

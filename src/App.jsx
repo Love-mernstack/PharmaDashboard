@@ -10,15 +10,14 @@ import PurchaseReturn from "./pages/PurchaseReturn";
 const App = () => {
   return (
     <Router>
-      <Layout>
-        <Routes>
+      <Routes>
+        <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
-          {/* <Route path="/" */}
-          <Route path="/stocks" element={<Stock/>}/>
-          <Route path="/POS" element={<POS/>}/>
-          <Route path="/purchase" element={<PurchaseReturn/>}/>
-        </Routes>
-      </Layout>
+          <Route path="/stocks" element={<Stock />} />
+          <Route path="/POS" element={<POS />} />
+          <Route path="/purchase" element={<PurchaseReturn />} />
+        </Route>
+      </Routes>
     </Router>
   );
 };
