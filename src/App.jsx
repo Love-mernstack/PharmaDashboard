@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Stock from "./pages/Stock";
 import POS from "./pages/POS";
 import PurchaseReturn from "./pages/PurchaseReturn";
+import CustomerReturn from "./pages/CustomerReturn";
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
           <Route path="/stocks" element={<Stock />} />
           <Route path="/POS" element={<POS />} />
           <Route path="/purchase" element={<PurchaseReturn />} />
+          <Route path="/customer-returns" element={<CustomerReturn/>}/>
         </Route>
       </Routes>
     </Router>

@@ -10,11 +10,13 @@ const registeredCustomers = [
 ];
 
 const medicines = [
-  { id: 1, name: "Paracetamol", price: 50 },
-  { id: 2, name: "Amoxicillin", price: 80 },
-  { id: 3, name: "Cough Syrup", price: 120 },
-  { id: 4, name: "Insulin", price: 250 },
+  { id: 1, name: "Paracetamol", price: 50, unit: "Tablet" },
+  { id: 2, name: "Amoxicillin", price: 80, unit: "Capsule" },
+  { id: 3, name: "Cough Syrup", price: 120, unit: "Bottle" },
+  { id: 4, name: "Insulin", price: 250, unit: "Vial" },
 ];
+
+const unitTypes = ["Tablet", "Strip", "Box", "Bottle", "Vial"];
 
 const POS = () => {
   const [query, setQuery] = useState("");
@@ -33,7 +35,10 @@ const POS = () => {
         )
       );
     } else {
-      setCart([...cart, { ...med, quantity: 1 }]);
+      setCart([
+        ...cart,
+        { ...med, quantity: 1, unitType: med.unit },
+      ]);
     }
     setQuery("");
   };
@@ -68,86 +73,75 @@ const POS = () => {
   }, [customerMobile]);
 
   const generatePDF = () => {
-  const doc = new jsPDF();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const margin = 10;
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 10;
 
-  // Draw Border
-  doc.setDrawColor(150);
-  doc.rect(margin, margin, pageWidth - margin * 2, 270, 'S');
+    doc.setDrawColor(150);
+    doc.rect(margin, margin, pageWidth - margin * 2, 270, "S");
 
-  // Header
-  doc.setFontSize(16);
-  doc.text("PharmaDash - Invoice", margin + 4, 20);
-  doc.setFontSize(10);
-  doc.text("ABC Pharmacy, 123 Market Street", margin + 4, 26);
-  doc.text("Phone: 0123-456789 | GSTIN: 22ABCDE1234FZ1", margin + 4, 31);
+    doc.setFontSize(16);
+    doc.text("PharmaDash - Invoice", margin + 4, 20);
+    doc.setFontSize(10);
+    doc.text("ABC Pharmacy, 123 Market Street", margin + 4, 26);
+    doc.text("Phone: 0123-456789 | GSTIN: 22ABCDE1234FZ1", margin + 4, 31);
 
-  // Customer and Date Info
-  doc.setFontSize(12);
-  doc.text(`Customer: ${customerName}`, margin + 4, 42);
-  doc.text(`Mobile: ${customerMobile}`, margin + 4, 48);
-  doc.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth - margin - 4, 42, { align: "right" });
-  doc.text(`Time: ${new Date().toLocaleTimeString()}`, pageWidth - margin - 4, 48, { align: "right" });
+    doc.setFontSize(12);
+    doc.text(`Customer: ${customerName}`, margin + 4, 42);
+    doc.text(`Mobile: ${customerMobile}`, margin + 4, 48);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth - margin - 4, 42, { align: "right" });
+    doc.text(`Time: ${new Date().toLocaleTimeString()}`, pageWidth - margin - 4, 48, { align: "right" });
 
-  // Table Content
-  const tableData = cart.map((item, index) => [
-    index + 1,
-    item.name,
-    item.quantity,
-    item.price.toFixed(2),
-    (item.price * item.quantity).toFixed(2),
-  ]);
+    const tableData = cart.map((item, index) => [
+      index + 1,
+      item.name,
+      item.unitType,
+      item.quantity,
+      item.price.toFixed(2),
+      (item.price * item.quantity).toFixed(2),
+    ]);
 
-  autoTable(doc, {
-    startY: 58,
-    head: [["#", "Medicine", "Qty", "Price", "Amount"]],
-    body: tableData,
-    theme: "grid",
-    styles: { fontSize: 10 },
-    headStyles: { fillColor: [0, 128, 128], textColor: 255 },
-    margin: { left: margin, right: margin },
-  });
+    autoTable(doc, {
+      startY: 58,
+      head: [["#", "Medicine", "Unit", "Qty", "Price", "Amount"]],
+      body: tableData,
+      theme: "grid",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [0, 128, 128], textColor: 255 },
+      margin: { left: margin, right: margin },
+    });
 
-  const finalY = doc.lastAutoTable.finalY || 70;
+    const finalY = doc.lastAutoTable.finalY || 70;
 
-  // Billing Summary
-  doc.setFontSize(12);
-  doc.text(`Subtotal: ${subtotal.toFixed(2)}`, pageWidth - margin - 4, finalY + 10, { align: "right" });
-  doc.text(`Tax (5%): ${tax.toFixed(2)}`, pageWidth - margin - 4, finalY + 16, { align: "right" });
-  doc.setFontSize(13);
-  doc.text(`Total: ${total.toFixed(2)}`, pageWidth - margin - 4, finalY + 24, { align: "right" });
+    doc.setFontSize(12);
+    doc.text(`Subtotal: ₹${subtotal.toFixed(2)}`, pageWidth - margin - 4, finalY + 10, { align: "right" });
+    doc.text(`Tax (5%): ₹${tax.toFixed(2)}`, pageWidth - margin - 4, finalY + 16, { align: "right" });
+    doc.setFontSize(13);
+    doc.text(`Total: ₹${total.toFixed(2)}`, pageWidth - margin - 4, finalY + 24, { align: "right" });
 
-  // Thank you message
-  doc.setFontSize(10);
-  doc.text("Thank you for shopping with us!", margin + 4, finalY + 34);
-  doc.text("Visit Again!", margin + 4, finalY + 40);
+    doc.setFontSize(10);
+    doc.text("Thank you for shopping with us!", margin + 4, finalY + 34);
+    doc.text("Visit Again!", margin + 4, finalY + 40);
 
-  // GST Terms & Conditions
-  doc.setFontSize(9);
-  doc.text("Terms & Conditions:", margin + 4, finalY + 52);
-  doc.setFontSize(8);
-  const terms = [
-    "1. Goods once sold will not be taken back or exchanged.",
-    "2. All disputes are subject to jurisdiction of local courts only.",
-    "3. This is a computer-generated invoice and does not require a signature.",
-    "4. Please check the medicines and bill before leaving the counter.",
-    "5. GST included as applicable under government norms.",
-  ];
-  terms.forEach((line, i) => {
-    doc.text(line, margin + 6, finalY + 58 + i * 5);
-  });
+    doc.setFontSize(9);
+    doc.text("Terms & Conditions:", margin + 4, finalY + 52);
+    doc.setFontSize(8);
+    [
+      "1. Goods once sold will not be taken back or exchanged.",
+      "2. All disputes are subject to jurisdiction of local courts only.",
+      "3. This is a computer-generated invoice and does not require a signature.",
+      "4. Please check the medicines and bill before leaving the counter.",
+      "5. GST included as applicable under government norms.",
+    ].forEach((line, i) => {
+      doc.text(line, margin + 6, finalY + 58 + i * 5);
+    });
 
-  // Signature Line
-  doc.setDrawColor(0);
-  doc.line(pageWidth - 60, 270, pageWidth - 10, 270); // signature line
-  doc.text("Authorized Signature", pageWidth - 60, 275);
+    doc.setDrawColor(0);
+    doc.line(pageWidth - 60, 270, pageWidth - 10, 270);
+    doc.text("Authorized Signature", pageWidth - 60, 275);
 
-  // Save
-  doc.save(`Invoice_${customerName || "Customer"}.pdf`);
-};
-
-
+    doc.save(`Invoice_${customerName || "Customer"}.pdf`);
+  };
 
   const handleBilling = () => {
     if (!customerMobile.trim() || !customerName.trim() || cart.length === 0) return;
@@ -173,19 +167,15 @@ const POS = () => {
   return (
     <div className="p-6 relative">
       <h2 className="text-4xl font-bold text-gray-900 mb-2">💳 Point of Sale</h2>
-      <p className="text-gray-500 mb-6">
-        Enter customer mobile to autofill or register new customer.
-      </p>
+      <p className="text-gray-500 mb-6">Enter customer mobile to autofill or register new customer.</p>
 
-      <div className="mb-4 max-w-md">
-        <input
-          type="tel"
-          placeholder="Enter Mobile Number"
-          value={customerMobile}
-          onChange={(e) => setCustomerMobile(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 text-lg"
-        />
-      </div>
+      <input
+        type="tel"
+        placeholder="Enter Mobile Number"
+        value={customerMobile}
+        onChange={(e) => setCustomerMobile(e.target.value)}
+        className="w-full max-w-md px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 text-lg mb-4"
+      />
 
       {customerMobile.trim() && (
         <div className="mb-6 max-w-md">
@@ -205,7 +195,6 @@ const POS = () => {
         </div>
       )}
 
-      {/* Medicine Search */}
       <div className="relative max-w-md mb-6">
         <input
           type="text"
@@ -223,20 +212,20 @@ const POS = () => {
                 onClick={() => addToCart(med)}
                 className="px-4 py-2 cursor-pointer hover:bg-teal-50"
               >
-                {med.name} - Rs. {med.price}
+                {med.name} - ₹{med.price} / {med.unit}
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      {/* Cart Table */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white shadow-md rounded-2xl border overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 text-lg">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left font-semibold text-gray-700">Medicine</th>
+                <th className="px-6 py-3 text-left font-semibold text-gray-700">Unit</th>
                 <th className="px-6 py-3 text-left font-semibold text-gray-700">Price</th>
                 <th className="px-6 py-3 text-left font-semibold text-gray-700">Qty</th>
                 <th className="px-6 py-3 text-left font-semibold text-gray-700">Total</th>
@@ -247,7 +236,26 @@ const POS = () => {
               {cart.map((item) => (
                 <tr key={item.id}>
                   <td className="px-6 py-4 font-medium text-gray-900">{item.name}</td>
-                  <td className="px-6 py-4">Rs. {item.price}</td>
+                  <td className="px-6 py-4">
+                    <select
+                      value={item.unitType}
+                      onChange={(e) =>
+                        setCart(
+                          cart.map((med) =>
+                            med.id === item.id ? { ...med, unitType: e.target.value } : med
+                          )
+                        )
+                      }
+                      className="border border-gray-300 rounded-md px-2 py-1"
+                    >
+                      {unitTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-6 py-4">₹{item.price}</td>
                   <td className="px-6 py-4">
                     <input
                       type="number"
@@ -258,7 +266,7 @@ const POS = () => {
                     />
                   </td>
                   <td className="px-6 py-4 font-semibold">
-                    Rs. {item.price * item.quantity}
+                    ₹{item.price * item.quantity}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <button onClick={() => removeFromCart(item.id)}>
@@ -274,22 +282,21 @@ const POS = () => {
           )}
         </div>
 
-        {/* Billing Summary */}
         <div className="bg-white border rounded-2xl p-6 shadow-md sticky top-6 h-fit">
           <h3 className="text-2xl font-semibold mb-4 text-gray-800">Billing Summary</h3>
           <div className="space-y-3 text-gray-700 text-lg">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>Rs. {subtotal}</span>
+              <span>₹{subtotal}</span>
             </div>
             <div className="flex justify-between">
               <span>Tax (5%)</span>
-              <span>Rs. {tax}</span>
+              <span>₹{tax}</span>
             </div>
             <hr />
             <div className="flex justify-between font-bold text-xl text-gray-900">
               <span>Total</span>
-              <span>Rs. {total}</span>
+              <span>₹{total}</span>
             </div>
           </div>
           <button
@@ -301,7 +308,6 @@ const POS = () => {
         </div>
       </div>
 
-      {/* Confirmation Popup */}
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-lg">
