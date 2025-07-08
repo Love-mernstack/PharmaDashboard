@@ -1,5 +1,5 @@
 // src/pages/Dashboard.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -16,108 +16,133 @@ import {
   Line,
 } from "recharts";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import axios from "axios";
 
 const COLORS = ["#0D9488", "#10B981", "#3B82F6", "#8B5CF6"];
 
-const salesData = [
-  { name: "Jan", sales: 4000 },
-  { name: "Feb", sales: 3000 },
-  { name: "Mar", sales: 2000 },
-  { name: "Apr", sales: 2780 },
-  { name: "May", sales: 1890 },
-  { name: "Jun", sales: 2390 },
-];
-
-const revenueData = [
-  { name: "Jan", revenue: 22000 },
-  { name: "Feb", revenue: 24000 },
-  { name: "Mar", revenue: 20000 },
-  { name: "Apr", revenue: 27800 },
-  { name: "May", revenue: 30000 },
-  { name: "Jun", revenue: 32000 },
-];
-
-const categoryData = [
-  { name: "Tablets", value: 400 },
-  { name: "Syrups", value: 300 },
-  { name: "Injections", value: 300 },
-  { name: "Ointments", value: 200 },
-];
-
-const stockStatusData = [
-  { name: "In Stock", value: 950 },
-  { name: "Low Stock", value: 150 },
-  { name: "Expired", value: 70 },
-];
-
-const statCards = [
-  {
-    title: "Total Sales",
-    value: "₹1.2L",
-    growth: "+12%",
-    positive: true,
-    color: "bg-teal-100",
-    text: "text-teal-800",
-  },
-  {
-    title: "Medicines in Stock",
-    value: "1,235",
-    growth: "-5%",
-    positive: false,
-    color: "bg-green-100",
-    text: "text-green-800",
-  },
-  {
-    title: "Orders",
-    value: "876",
-    growth: "+8%",
-    positive: true,
-    color: "bg-blue-100",
-    text: "text-blue-800",
-  },
-  {
-    title: "Customers",
-    value: "543",
-    growth: "+3%",
-    positive: true,
-    color: "bg-purple-100",
-    text: "text-purple-800",
-  },
-  {
-    title: "Expired Medicines",
-    value: "70",
-    growth: "+10%",
-    positive: false,
-    color: "bg-red-100",
-    text: "text-red-800",
-  },
-  {
-    title: "Low Stock Alerts",
-    value: "150",
-    growth: "+6%",
-    positive: false,
-    color: "bg-yellow-100",
-    text: "text-yellow-800",
-  },
-  {
-    title: "Pending Orders",
-    value: "34",
-    growth: "-2%",
-    positive: false,
-    color: "bg-orange-100",
-    text: "text-orange-800",
-  },
-  {
-    title: "This Month's Revenue",
-    value: "₹32,000",
-    growth: "+15%",
-    positive: true,
-    color: "bg-indigo-100",
-    text: "text-indigo-800",
-  },
-];
-
 const Dashboard = () => {
+  const [statCards, setStatCards] = useState([]);
+  const [salesData, setSalesData] = useState([]);
+  const [revenueData, setRevenueData] = useState([]);
+  const [categoryData, setCategoryData] = useState([]);
+  const [stockStatusData, setStockStatusData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data } = await axios.get("https://codigoaldea1.pythonanywhere.com/api/home");
+
+        // Example hardcoded sales/revenue/category data (replace if API provides these)
+        const mockSalesData = [
+          { name: "Jan", sales: 4000 },
+          { name: "Feb", sales: 3000 },
+          { name: "Mar", sales: 2000 },
+          { name: "Apr", sales: 2780 },
+          { name: "May", sales: 1890 },
+          { name: "Jun", sales: 2390 },
+        ];
+        const mockRevenueData = [
+          { name: "Jan", revenue: 22000 },
+          { name: "Feb", revenue: 24000 },
+          { name: "Mar", revenue: 20000 },
+          { name: "Apr", revenue: 27800 },
+          { name: "May", revenue: 30000 },
+          { name: "Jun", revenue: 32000 },
+        ];
+        const mockCategoryData = [
+          { name: "Tablets", value: 400 },
+          { name: "Syrups", value: 300 },
+          { name: "Injections", value: 300 },
+          { name: "Ointments", value: 200 },
+        ];
+
+        // Prepare stat cards with backend values
+        const updatedStatCards = [
+          {
+            title: "Total Sales",
+            value: `₹${data.total_sales.toLocaleString()}`,
+            growth: "+12%", // static for now
+            positive: true,
+            color: "bg-teal-100",
+            text: "text-teal-800",
+          },
+          {
+            title: "Medicines in Stock",
+            value: data.medicine_stocks_count.toString(),
+            growth: "-5%", // static
+            positive: false,
+            color: "bg-green-100",
+            text: "text-green-800",
+          },
+          {
+            title: "Orders",
+            value: data.total_orders_count.toString(),
+            growth: "+8%", // static
+            positive: true,
+            color: "bg-blue-100",
+            text: "text-blue-800",
+          },
+          {
+            title: "Customers",
+            value: data.customer_count.toString(),
+            growth: "+3%", // static
+            positive: true,
+            color: "bg-purple-100",
+            text: "text-purple-800",
+          },
+          {
+            title: "Expired Medicines",
+            value: data.expired_medicine_count.toString(),
+            growth: "+10%", // static
+            positive: false,
+            color: "bg-red-100",
+            text: "text-red-800",
+          },
+          {
+            title: "Low Stock Alerts",
+            value: data.low_stock_count.toString(),
+            growth: "+6%", // static
+            positive: false,
+            color: "bg-yellow-100",
+            text: "text-yellow-800",
+          },
+          {
+            title: "Pending Orders",
+            value: data.pending_order_count.toString(),
+            growth: "-2%", // static
+            positive: false,
+            color: "bg-orange-100",
+            text: "text-orange-800",
+          },
+          {
+            title: "This Month's Revenue",
+            value: `₹${data.monthly_revenue.toLocaleString()}`,
+            growth: "+15%", // static
+            positive: true,
+            color: "bg-indigo-100",
+            text: "text-indigo-800",
+          },
+        ];
+
+        setStatCards(updatedStatCards);
+        setSalesData(mockSalesData); // replace with real data when available
+        setRevenueData(mockRevenueData); // replace with real data when available
+        setCategoryData(mockCategoryData); // replace with real data when available
+
+        // For Pie chart (stock status)
+        setStockStatusData([
+          { name: "In Stock", value: data.medicine_stocks_count },
+          { name: "Low Stock", value: data.low_stock_count },
+          { name: "Expired", value: data.expired_medicine_count },
+        ]);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="p-6">
       <h2 className="text-3xl font-bold mb-1 text-gray-800">Welcome Back!</h2>
@@ -184,7 +209,12 @@ const Dashboard = () => {
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="revenue" stroke="#8B5CF6" strokeWidth={3} />
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#8B5CF6"
+                  strokeWidth={3}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -210,7 +240,10 @@ const Dashboard = () => {
                   label={({ name }) => name}
                 >
                   {categoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
                 <Legend verticalAlign="bottom" height={36} />
@@ -238,7 +271,10 @@ const Dashboard = () => {
                   label={({ name }) => name}
                 >
                   {stockStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
                 <Legend verticalAlign="bottom" height={36} />

@@ -1,272 +1,9 @@
 // src/pages/Stock.jsx
-import React, { useState } from "react";
-import { Plus, Search, Filter } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Plus, Search } from "lucide-react";
+import axios from "axios";
 import AddMedicineModal from "../components/AddMedicineModal";
 import EditMedicineModal from "../components/EditMedicineModal";
-
-const initialStockData = [
-  {
-    id: 1,
-    name: "Paracetamol",
-    brand: "Cipla",
-    batchNo: "B001",
-    quantity: 120,
-    expiry: "2025-05-20",
-    category: "Painkiller",
-    supplier: "HealthCare Distributors",
-    location: "Shelf A1",
-    mrp: 25,
-    status: "In Stock",
-  },
-  {
-    id: 2,
-    name: "Amoxicillin",
-    brand: "Sun Pharma",
-    batchNo: "B002",
-    quantity: 8,
-    expiry: "2024-12-10",
-    category: "Antibiotic",
-    supplier: "Prime Medics",
-    location: "Shelf B2",
-    mrp: 42,
-    status: "Low Stock",
-  },
-  {
-    id: 3,
-    name: "Ibuprofen",
-    brand: "Dr. Reddy's",
-    batchNo: "B003",
-    quantity: 0,
-    expiry: "2023-09-15",
-    category: "Anti-inflammatory",
-    supplier: "MediSupply Co.",
-    location: "Shelf C3",
-    mrp: 30,
-    status: "Out of Stock",
-  },
-  {
-    id: 4,
-    name: "Cetirizine",
-    brand: "Zydus",
-    batchNo: "B004",
-    quantity: 5,
-    expiry: "2024-11-01",
-    category: "Antihistamine",
-    supplier: "Quick Pharma",
-    location: "Shelf D1",
-    mrp: 18,
-    status: "Low Stock",
-  },
-  {
-    id: 5,
-    name: "Metformin",
-    brand: "Glenmark",
-    batchNo: "B005",
-    quantity: 70,
-    expiry: "2026-03-10",
-    category: "Diabetes",
-    supplier: "HealthCare Distributors",
-    location: "Shelf A2",
-    mrp: 35,
-    status: "In Stock",
-  },
-  {
-    id: 6,
-    name: "Omeprazole",
-    brand: "Torrent Pharma",
-    batchNo: "B006",
-    quantity: 60,
-    expiry: "2025-01-05",
-    category: "Gastric",
-    supplier: "Quick Pharma",
-    location: "Shelf F1",
-    mrp: 22,
-    status: "In Stock",
-  },
-  {
-    id: 7,
-    name: "Azithromycin",
-    brand: "Alkem",
-    batchNo: "B007",
-    quantity: 15,
-    expiry: "2024-08-18",
-    category: "Antibiotic",
-    supplier: "Prime Medics",
-    location: "Shelf B1",
-    mrp: 65,
-    status: "In Stock",
-  },
-  {
-    id: 8,
-    name: "Losartan",
-    brand: "Lupin",
-    batchNo: "B008",
-    quantity: 0,
-    expiry: "2023-12-01",
-    category: "Hypertension",
-    supplier: "MediSupply Co.",
-    location: "Shelf E2",
-    mrp: 40,
-    status: "Out of Stock",
-  },
-  {
-    id: 9,
-    name: "Vitamin D3",
-    brand: "Abbott",
-    batchNo: "B009",
-    quantity: 25,
-    expiry: "2025-09-25",
-    category: "Supplements",
-    supplier: "NutriLife Supplies",
-    location: "Shelf G1",
-    mrp: 50,
-    status: "In Stock",
-  },
-  {
-    id: 10,
-    name: "Levothyroxine",
-    brand: "Mankind",
-    batchNo: "B010",
-    quantity: 9,
-    expiry: "2024-07-14",
-    category: "Thyroid",
-    supplier: "MediSupply Co.",
-    location: "Shelf H2",
-    mrp: 28,
-    status: "Low Stock",
-  },
-  {
-    id: 11,
-    name: "Aspirin",
-    brand: "Bayer",
-    batchNo: "B011",
-    quantity: 14,
-    expiry: "2026-01-10",
-    category: "Blood Thinner",
-    supplier: "Quick Pharma",
-    location: "Shelf C1",
-    mrp: 12,
-    status: "In Stock",
-  },
-  {
-    id: 12,
-    name: "Insulin",
-    brand: "Novo Nordisk",
-    batchNo: "B012",
-    quantity: 4,
-    expiry: "2024-10-20",
-    category: "Diabetes",
-    supplier: "Prime Medics",
-    location: "Fridge",
-    mrp: 110,
-    status: "Low Stock",
-  },
-  {
-    id: 13,
-    name: "Calcium Tablets",
-    brand: "Himalaya",
-    batchNo: "B013",
-    quantity: 33,
-    expiry: "2025-06-30",
-    category: "Supplements",
-    supplier: "NutriLife Supplies",
-    location: "Shelf G2",
-    mrp: 45,
-    status: "In Stock",
-  },
-  {
-    id: 14,
-    name: "Ranitidine",
-    brand: "Sun Pharma",
-    batchNo: "B014",
-    quantity: 0,
-    expiry: "2023-08-01",
-    category: "Gastric",
-    supplier: "HealthCare Distributors",
-    location: "Shelf F2",
-    mrp: 20,
-    status: "Expired",
-  },
-  {
-    id: 15,
-    name: "Multivitamin Syrup",
-    brand: "Zandu",
-    batchNo: "B015",
-    quantity: 12,
-    expiry: "2025-02-15",
-    category: "Supplements",
-    supplier: "Quick Pharma",
-    location: "Shelf G3",
-    mrp: 55,
-    status: "In Stock",
-  },
-  {
-    id: 16,
-    name: "Chlorpheniramine",
-    brand: "Alkem",
-    batchNo: "B016",
-    quantity: 5,
-    expiry: "2024-11-25",
-    category: "Cold & Allergy",
-    supplier: "Prime Medics",
-    location: "Shelf D3",
-    mrp: 18,
-    status: "Low Stock",
-  },
-  {
-    id: 17,
-    name: "Hydroxychloroquine",
-    brand: "Ipca",
-    batchNo: "B017",
-    quantity: 60,
-    expiry: "2026-05-05",
-    category: "Malaria",
-    supplier: "HealthCare Distributors",
-    location: "Shelf E4",
-    mrp: 35,
-    status: "In Stock",
-  },
-  {
-    id: 18,
-    name: "Domperidone",
-    brand: "Torrent",
-    batchNo: "B018",
-    quantity: 3,
-    expiry: "2024-12-20",
-    category: "Digestive",
-    supplier: "MediSupply Co.",
-    location: "Shelf F3",
-    mrp: 22,
-    status: "Low Stock",
-  },
-  {
-    id: 19,
-    name: "Pantoprazole",
-    brand: "Lupin",
-    batchNo: "B019",
-    quantity: 100,
-    expiry: "2025-04-10",
-    category: "Gastric",
-    supplier: "Quick Pharma",
-    location: "Shelf F5",
-    mrp: 25,
-    status: "In Stock",
-  },
-  {
-    id: 20,
-    name: "Cefixime",
-    brand: "Cipla",
-    batchNo: "B020",
-    quantity: 6,
-    expiry: "2024-09-30",
-    category: "Antibiotic",
-    supplier: "Prime Medics",
-    location: "Shelf B5",
-    mrp: 60,
-    status: "Low Stock",
-  },
-];
-
 
 const getStatus = (qty, expiry) => {
   const isExpired = new Date(expiry) < new Date();
@@ -293,13 +30,48 @@ const getStatusStyle = (status) => {
 
 const Stock = () => {
   const [query, setQuery] = useState("");
-  const [stockData, setStockData] = useState(initialStockData);
+  const [stockData, setStockData] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [filterStatus, setFilterStatus] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const itemsPerPage = 5;
+
+  useEffect(() => {
+    const fetchStockData = async () => {
+      try {
+        const res = await axios.get(
+          `https://codigoaldea1.pythonanywhere.com/api/stocks?page=${currentPage}`
+        );
+
+        const formatted = res.data.stocks.map((item) => {
+          const purchase = item.last_purchase;
+          return {
+            id: item.id,
+            name: purchase?.medicine_name?.name || "-",
+            brand: purchase?.medicine_name?.manufacturer?.manufac_name || "-",
+            batchNo: purchase?.batch_id || "-",
+            quantity: item.quantity || 0,
+            expiry: purchase?.expiry || "-",
+            category: "-", // Not available in API
+            supplier: purchase?.supplier?.name || "-",
+            location: "-", // Not available in API
+            mrp: purchase?.tabs_sp || 0,
+            status: getStatus(item.quantity || 0, purchase?.expiry),
+          };
+        });
+
+        setStockData(formatted);
+        setTotalCount(res.data.stocks_count_all || formatted.length);
+      } catch (error) {
+        console.error("Error fetching stock data:", error);
+      }
+    };
+
+    fetchStockData();
+  }, [currentPage]);
 
   const handleDelete = (id) => {
     setStockData(stockData.filter((item) => item.id !== id));
@@ -318,7 +90,13 @@ const Stock = () => {
   const handleUpdate = (updatedMedicine) => {
     const updatedList = stockData.map((item) =>
       item.id === updatedMedicine.id
-        ? { ...updatedMedicine, status: getStatus(updatedMedicine.quantity, updatedMedicine.expiry) }
+        ? {
+            ...updatedMedicine,
+            status: getStatus(
+              updatedMedicine.quantity,
+              updatedMedicine.expiry
+            ),
+          }
         : item
     );
     setStockData(updatedList);
@@ -331,12 +109,14 @@ const Stock = () => {
   };
 
   const filteredData = stockData.filter((item) => {
-    const matchesQuery = item.name.toLowerCase().includes(query.toLowerCase());
+    const matchesQuery = item.name
+      .toLowerCase()
+      .includes(query.toLowerCase());
     const matchesStatus = filterStatus === "All" || item.status === filterStatus;
     return matchesQuery && matchesStatus;
   });
 
-  const pageCount = Math.ceil(filteredData.length / itemsPerPage);
+  const pageCount = Math.ceil(totalCount / itemsPerPage);
   const paginatedData = filteredData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -345,8 +125,12 @@ const Stock = () => {
   return (
     <div className="p-6 min-h-screen flex flex-col">
       <div className="mb-6">
-        <h2 className="text-4xl font-bold text-gray-900 mb-1">📦 Stock Management</h2>
-        <p className="text-gray-500">Monitor and manage medicines efficiently.</p>
+        <h2 className="text-4xl font-bold text-gray-900 mb-1">
+          📦 Stock Management
+        </h2>
+        <p className="text-gray-500">
+          Monitor and manage medicines efficiently.
+        </p>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
@@ -413,7 +197,11 @@ const Stock = () => {
                   <td className="px-6 py-4 text-sm">{item.location}</td>
                   <td className="px-6 py-4 text-sm">₹{item.mrp}</td>
                   <td className="px-6 py-4 text-sm">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(item.status)}`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(
+                        item.status
+                      )}`}
+                    >
                       {item.status}
                     </span>
                   </td>
@@ -460,7 +248,11 @@ const Stock = () => {
         ))}
       </div>
 
-      <AddMedicineModal show={showAddModal} onClose={() => setShowAddModal(false)} onAdd={handleAdd} />
+      <AddMedicineModal
+        show={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={handleAdd}
+      />
       <EditMedicineModal
         show={showEditModal}
         onClose={() => setShowEditModal(false)}

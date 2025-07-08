@@ -2,12 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Search, Trash2 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-
-const registeredCustomers = [
-  { name: "Amit Kumar", mobile: "9876543210" },
-  { name: "Sneha Sharma", mobile: "9123456789" },
-  { name: "Love", mobile: "9877727858" },
-];
+import axios from "axios";
 
 const medicines = [
   { id: 1, name: "Paracetamol", price: 50, unit: "Tablet" },
@@ -25,6 +20,7 @@ const POS = () => {
   const [customerName, setCustomerName] = useState("");
   const [customerFound, setCustomerFound] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+  const [loadingCustomer, setLoadingCustomer] = useState(false);
 
   const addToCart = (med) => {
     const exists = cart.find((item) => item.id === med.id);
@@ -35,10 +31,7 @@ const POS = () => {
         )
       );
     } else {
-      setCart([
-        ...cart,
-        { ...med, quantity: 1, unitType: med.unit },
-      ]);
+      setCart([...cart, { ...med, quantity: 1, unitType: med.unit }]);
     }
     setQuery("");
   };
@@ -60,16 +53,35 @@ const POS = () => {
   );
 
   useEffect(() => {
-    const found = registeredCustomers.find(
-      (cust) => cust.mobile === customerMobile.trim()
-    );
-    if (found) {
-      setCustomerName(found.name);
-      setCustomerFound(true);
-    } else {
+    if (customerMobile.trim().length < 10) {
       setCustomerName("");
       setCustomerFound(false);
+      return;
     }
+
+    const fetchCustomer = async () => {
+      try {
+        setLoadingCustomer(true);
+        const res = await axios.post("https://codigoaldea1.pythonanywhere.com/api/get_customer_info", {
+          phone_no: customerMobile.trim(),
+        });
+        console.log(res)
+        if (res.data.status === "success") {
+          setCustomerName(res.data.customer.name);
+          setCustomerFound(true);
+        } else {
+          setCustomerName("");
+          setCustomerFound(false);
+        }
+      } catch (err) {
+        setCustomerName("");
+        setCustomerFound(false);
+      } finally {
+        setLoadingCustomer(false);
+      }
+    };
+
+    fetchCustomer();
   }, [customerMobile]);
 
   const generatePDF = () => {
@@ -145,9 +157,6 @@ const POS = () => {
 
   const handleBilling = () => {
     if (!customerMobile.trim() || !customerName.trim() || cart.length === 0) return;
-    if (!customerFound) {
-      registeredCustomers.push({ name: customerName, mobile: customerMobile });
-    }
     setShowPopup(true);
   };
 
@@ -179,7 +188,9 @@ const POS = () => {
 
       {customerMobile.trim() && (
         <div className="mb-6 max-w-md">
-          {customerFound ? (
+          {loadingCustomer ? (
+            <p className="text-blue-600 text-lg">🔄 Checking customer info...</p>
+          ) : customerFound ? (
             <p className="text-green-600 text-lg">
               ✅ Welcome back, <strong>{customerName}</strong>
             </p>
